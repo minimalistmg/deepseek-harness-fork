@@ -9,7 +9,9 @@ import {
   dialog,
   ipcMain,
   Menu,
+  nativeImage,
   protocol,
+  Tray,
   type IpcMainInvokeEvent,
 } from 'electron'
 import { resolveDesktopPaths } from './paths.ts'
@@ -19,6 +21,7 @@ import { DesktopBackendController, type DesktopBackendState } from './backend-co
 import { DESKTOP_IPC, type DesktopUpdateState } from './ipc.ts'
 import { formatDesktopMessage, resolveDesktopLocale } from './locale.ts'
 import { claimDesktopSingleInstance } from './single-instance.ts'
+import { DESKTOP_TRAY_ICON, desktopTrayItems, type DesktopTrayAction } from './tray.ts'
 import { DesktopUpdateCoordinator } from './update-coordinator.ts'
 import { desktopErrorState } from './startup-error.ts'
 import { startupFailureDocument } from './startup-document.ts'
@@ -449,10 +452,35 @@ async function main(): Promise<void> {
     ],
   }]))
 
+  // The tray keeps the process alive with its window hidden, so every action it
+  // offers has to be reachable without that window.
+  const trayActions: Readonly<Record<DesktopTrayAction, () => void>> = {
+    show: () => { focusPrimaryWindow() },
+    updates: () => { void checkAndPrompt(true) },
+    quit: () => {
+      quitting = true
+      app.quit()
+    },
+  }
+  const tray = new Tray(nativeImage.createFromDataURL(DESKTOP_TRAY_ICON))
+  tray.setToolTip(messages.trayTooltip)
+  tray.setContextMenu(Menu.buildFromTemplate(desktopTrayItems(messages).map(item => ({
+    label: item.label,
+    click: () => { trayActions[item.id]() },
+  }))))
+  tray.on('click', () => { focusPrimaryWindow() })
+
   const createMainWindow = (): BrowserWindow => {
     const window = createWindow(appPreload, true)
     mainWindow = window
     window.on('closed', () => { if (mainWindow === window) mainWindow = undefined })
+    // Closing the window puts the application in the tray rather than ending it;
+    // only the tray's Quit, an update install, or a fatal start ends the run.
+    window.on('close', (event) => {
+      if (quitting) return
+      event.preventDefault()
+      window.hide()
+    })
     window.webContents.on('preload-error', (_event, _path, error) => {
       void showEmergencyError(error).catch((failure: unknown) => { console.error(failure) })
     })
@@ -481,7 +509,9 @@ async function main(): Promise<void> {
     if (BrowserWindow.getAllWindows().length === 0) focusPrimaryWindow()
   })
   app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit()
+    // A tray icon outlives the window it was created for: the run continues
+    // hidden until the tray's Quit. macOS keeps its own convention.
+    if (process.platform !== 'darwin' && tray.isDestroyed()) app.quit()
   })
   app.on('before-quit', (event) => {
     if (shellInstallerOwnsQuit || quitting) return

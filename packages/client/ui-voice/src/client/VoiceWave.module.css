@@ -1,0 +1,24 @@
+/* Dictation level meter under the composer card: a scrolling envelope on the
+   same row geometry the composer's stat pills use, so it reads as one more
+   ambient strip rather than a new surface. */
+
+.root {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  max-width: var(--dsh-chat-content-width);
+  width: 100%;
+  height: 18px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 4px calc(var(--dsh-composer-side-clearance) + 16px) 0px;
+}
+
+.bar {
+  flex: 1 1 0;
+  min-width: 1px;
+  max-width: 3px;
+  border-radius: 1px;
+  background: var(--dsw-alias-label-tertiary);
+  opacity: 0.6;
+}

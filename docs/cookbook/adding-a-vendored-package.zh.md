@@ -46,7 +46,7 @@ vendored TypeScript 源码中的本地相对导入/导出在复制后使用显�
 
 ## 3. 注意 manifest 守卫
 
-`scripts/check-vendor-manifest.sh`（pre-commit 钩子）会在 `vendor/*/src` 下有暂存改动但 `vendor/README.md` 未一起暂存时失败。请将 manifest 更新与源码一起暂存，以通过提交检查。
+`scripts/check-vendor-manifest.ts`（pre-commit 钩子）会在 `vendor/*/src` 或 vendor 的 `bin.js` 下有暂存改动但 `vendor/README.md` 未一起暂存时失败。请将 manifest 更新与源码一起暂存，以通过提交检查。
 
 ## 4. 验证
 

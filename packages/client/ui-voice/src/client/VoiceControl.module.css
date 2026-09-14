@@ -1,0 +1,33 @@
+/* Voice seat: a compact 28px icon control matching the composer's attach
+   circle. The listening state takes the selector fill the attach control uses
+   so active dictation reads at a glance without a new accent token. */
+.voice {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  corner-shape: round;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+.voice:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover-solid);
+  color: var(--dsw-alias-label-primary);
+}
+
+.voice:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.listening,
+.listening:hover:not(:disabled) {
+  background: var(--dsw-specific-selector);
+  color: var(--dsw-alias-label-primary);
+}

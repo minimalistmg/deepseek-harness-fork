@@ -126,6 +126,8 @@ const kit: Omit<QuestionComposerProps, 'matched'> = {
   useInput: selector => selector(inputState),
   inputActions: {
     setDraft: () => { throw new Error('unused') },
+    insertText: () => { throw new Error('unused') },
+    replaceRange: () => { throw new Error('unused') },
     addAttachments: () => { throw new Error('unused') },
     removeAttachment: () => { throw new Error('unused') },
     pruneAttachments: () => { throw new Error('unused') },

@@ -216,6 +216,8 @@ function standaloneProps(
   })
   const inputActions: InputActions = {
     setDraft: () => {},
+    insertText: () => {},
+    replaceRange: () => false,
     addAttachments: () => false,
     removeAttachment: () => {},
     pruneAttachments: () => {},
@@ -339,6 +341,8 @@ function mount(fixture: Awaited<ReturnType<typeof bench>>) {
   }))
   const inputActions: InputActions = {
     setDraft: vi.fn(),
+    insertText: vi.fn(),
+    replaceRange: vi.fn(() => true),
     addAttachments: vi.fn(() => false),
     removeAttachment: vi.fn(),
     pruneAttachments: vi.fn(),

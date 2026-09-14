@@ -1,0 +1,27 @@
+/* Hold control: a text capsule matching the composer tool row's height, filled
+   only when the draft can be parked. */
+
+.hold {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 999px;
+  corner-shape: round;
+  background: transparent;
+  font: inherit;
+  font-size: var(--dsh-content-font-size-secondary, 13px);
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+.hold:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover-solid);
+  color: var(--dsw-alias-label-primary);
+}
+
+.hold:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

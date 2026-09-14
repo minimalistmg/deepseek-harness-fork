@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { join } from 'node:path'
 import { DESKTOP_IPC } from '../src/ipc.ts'
+import { en } from '../src/locale.ts'
 
 const harness = await vi.hoisted(async () => {
   const { EventEmitter } = await import('node:events')
@@ -12,6 +13,7 @@ const harness = await vi.hoisted(async () => {
   }
   const windows: FakeWindow[] = []
   const hosts: FakeHost[] = []
+  const trays: FakeTray[] = []
   const handlers = new Map<string, (event: { senderFrame: { url: string } }) => unknown>()
   let pluginsEnabled = false
   let preparing = deferred()
@@ -34,6 +36,7 @@ const harness = await vi.hoisted(async () => {
     readonly show = vi.fn()
     readonly focus = vi.fn()
     readonly restore = vi.fn()
+    readonly hide = vi.fn()
     constructor(readonly options: { show: boolean }) { super(); windows.push(this) }
     isDestroyed() { return this.destroyed }
     isMinimized() { return false }
@@ -42,10 +45,15 @@ const harness = await vi.hoisted(async () => {
       if (url === 'dsh-app://app/index.html') navigated.resolve()
     }
     static getAllWindows() { return windows.filter(window => !window.destroyed) }
-    close() { this.destroyed = true; this.emit('closed') }
+    close() {
+      const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true } }
+      this.emit('close', event)
+      if (event.defaultPrevented) return
+      this.destroyed = true
+      this.emit('closed')
+    }
   }
-  class FakeHost {
-    readonly ready = deferred()
+  class FakeHost {    readonly ready = deferred()
     readonly exited = deferred()
     readonly stopping = deferred()
     readonly start = vi.fn(() => { hostStarted.resolve(); return this.ready.promise })
@@ -55,6 +63,14 @@ const harness = await vi.hoisted(async () => {
       return this.exited.promise
     })
     constructor(readonly node: string, readonly runtime: string, readonly profile: string) { hosts.push(this) }
+  }
+  class FakeTray extends EventEmitter {
+    destroyed = false
+    readonly setToolTip = vi.fn()
+    readonly setContextMenu = vi.fn()
+    constructor(readonly image: unknown) { super(); trays.push(this) }
+    isDestroyed() { return this.destroyed }
+    destroy() { this.destroyed = true }
   }
   const app = Object.assign(new EventEmitter(), {
     isPackaged: true,
@@ -73,7 +89,7 @@ const harness = await vi.hoisted(async () => {
     }),
   })
   return {
-    windows, hosts, handlers, app, FakeWindow, FakeHost,
+    windows, hosts, handlers, app, FakeWindow, FakeHost, FakeTray, trays,
     dialog: { showErrorBox: vi.fn(), showMessageBox: vi.fn() },
     applyRelease: vi.fn(() => { preparing.resolve(); return prepared.promise }),
     assertProfileRuntime: vi.fn(),
@@ -85,7 +101,7 @@ const harness = await vi.hoisted(async () => {
     get pluginsEnabled() { return pluginsEnabled },
     set pluginsEnabled(value: boolean) { pluginsEnabled = value },
     reset() {
-      windows.length = 0; hosts.length = 0; handlers.clear(); app.removeAllListeners()
+      windows.length = 0; hosts.length = 0; handlers.clear(); trays.length = 0; app.removeAllListeners()
       app.isPackaged = true
       pluginsEnabled = false
       preparing = deferred(); prepared = deferred(); hostStarted = deferred()
@@ -97,11 +113,13 @@ const harness = await vi.hoisted(async () => {
 vi.mock('electron', () => ({
   app: harness.app,
   BrowserWindow: harness.FakeWindow,
+  Tray: harness.FakeTray,
+  nativeImage: { createFromDataURL: vi.fn((url: string) => ({ url })) },
   dialog: harness.dialog,
   ipcMain: {
     handle: (channel: string, handler: (event: { senderFrame: { url: string } }) => unknown) => { harness.handlers.set(channel, handler) },
   },
-  Menu: { setApplicationMenu: vi.fn(), buildFromTemplate: vi.fn() },
+  Menu: { setApplicationMenu: vi.fn(), buildFromTemplate: vi.fn((template: unknown) => template) },
   protocol: { registerSchemesAsPrivileged: vi.fn(), handle: vi.fn() },
 }))
 vi.mock('../src/paths.ts', () => ({ resolveDesktopPaths: () => ({ profile: 'desktop-test-profile' }) }))
@@ -364,5 +382,73 @@ describe('desktop main startup', () => {
     expect(host.stop).toHaveBeenCalledTimes(1)
     expect(window.urls).toEqual(['dsh-app://shell/startup.html'])
     expect(harness.windows).toHaveLength(1)
+  })
+})
+
+describe('desktop tray', () => {
+  /** One entry of the tray menu the shell installed. */
+  interface TrayMenuItem { readonly label: string; click?(): void }
+
+  /**
+   * The tray the shell created, with the menu it installed.
+   * @returns the fake tray and its menu template.
+   */
+  function installedTray() {
+    const tray = harness.trays[0]!
+    const menu = tray.setContextMenu.mock.calls[0]?.[0] as TrayMenuItem[] | undefined
+    if (menu === undefined) throw new Error('the shell installed no tray menu')
+    return { tray, menu }
+  }
+
+  it('creates one tray carrying the resolved menu and tooltip', async () => {
+    await import('../src/main.ts')
+    await harness.preparing.promise
+    expect(harness.trays).toHaveLength(1)
+    const { tray, menu } = installedTray()
+    expect(tray.setToolTip).toHaveBeenCalledWith(en.trayTooltip)
+    expect(menu.map(item => item.label)).toEqual([en.trayShow, en.trayUpdates, en.trayQuit])
+  })
+
+  it('hides the main window instead of ending the run when it is closed', async () => {
+    await import('../src/main.ts')
+    await harness.preparing.promise
+    const window = harness.windows[0]!
+    window.close()
+    expect(window.hide).toHaveBeenCalledTimes(1)
+    expect(window.destroyed).toBe(false)
+    expect(harness.app.quit).not.toHaveBeenCalled()
+  })
+
+  it('brings the hidden window back from the tray', async () => {
+    await import('../src/main.ts')
+    await harness.preparing.promise
+    const window = harness.windows[0]!
+    window.close()
+    const { tray } = installedTray()
+    tray.emit('click')
+    expect(window.show).toHaveBeenCalledTimes(1)
+    expect(window.focus).toHaveBeenCalled()
+  })
+
+  it('quits from the tray menu', async () => {
+    await import('../src/main.ts')
+    await harness.preparing.promise
+    harness.prepared.resolve()
+    await harness.hostStarted.promise
+    harness.hosts[0]!.ready.resolve()
+    const { menu } = installedTray()
+    const quit = menu.find(item => item.label === en.trayQuit)
+    expect(quit).toBeDefined()
+    harness.app.quit.mockClear()
+    quit?.click?.()
+    await harness.quitCompleted.promise
+    expect(harness.app.quit).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the run alive when every window is closed while the tray stands', async () => {
+    await import('../src/main.ts')
+    await harness.preparing.promise
+    harness.app.emit('window-all-closed')
+    expect(harness.app.quit).not.toHaveBeenCalled()
   })
 })

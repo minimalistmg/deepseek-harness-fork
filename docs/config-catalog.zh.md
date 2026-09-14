@@ -403,6 +403,95 @@ export interface Config {
 
 来源：[`packages/client/hmr/src/index.ts:31`](../packages/client/hmr/src/index.ts)
 
+<a id="deepseek-aidsh-client-ui-balance"></a>
+
+## `@deepseek-ai/dsh-client-ui-balance`
+
+需要： `connection`
+
+```ts config-catalog
+/** Plugin config (every field optional — the schema supplies the defaults). */
+export interface Config {
+  /** Credential reference resolved for each read. Defaults to `DEEPSEEK_API_KEY`. */
+  apiKeyEnv?: string
+  /** Platform origin; `/user/balance` is appended. Defaults to the DeepSeek platform. */
+  baseURL?: string
+  /**
+   * Currency the pill converts the total into, such as `INR`. Empty keeps the
+   * account's own currency and skips the exchange-rate request entirely.
+   */
+  displayCurrency?: string
+  /** Exchange-rate origin; `/latest` is appended. Defaults to the Frankfurter service. */
+  fxBaseURL?: string
+  /** Deadline for one read, in milliseconds. Defaults to 5000. */
+  timeoutMs?: number
+}
+```
+
+来源： [`packages/client/ui-balance/src/index.ts:33`](../packages/client/ui-balance/src/index.ts)
+
+<a id="deepseek-aidsh-client-ui-voice"></a>
+
+## `@deepseek-ai/dsh-client-ui-voice`
+
+需要： `connection`
+
+```ts config-catalog
+/** Plugin config (every field optional — the schema supplies the defaults). */
+export interface Config {
+  /** Credential reference resolved for each utterance. Defaults to `GEMINI_API_KEY`. */
+  apiKeyEnv?: string
+  /** Generative Language endpoint origin; the versioned method paths are appended. */
+  baseURL?: string
+  /** Gemini model id that polishes a transcript. Defaults to `gemini-3.6-flash`. */
+  polishModel?: string
+  /** Gemini Live model id that transcribes speech. Defaults to `gemini-3.5-transcribe-live`. */
+  liveModel?: string
+  /** Whether transcripts are polished at all. Defaults to `true`. */
+  polishEnabled?: boolean
+  /** Whether the browser may fall back to its own speech engine. Defaults to `false`. */
+  webSpeechEnabled?: boolean
+  /** Instruction sent as the polish model's system turn. Defaults to the shipped cleanup prompt. */
+  polishPrompt?: string
+  /**
+   * Upper bound on generated tokens for one polish. Defaults to 2048. The
+   * configured model is a thinking model and its thinking tokens count against
+   * this cap, so the default leaves headroom for them instead of sizing the
+   * budget from the transcript length.
+   */
+  maxOutputTokens?: number
+  /** Deadline for one polish request in milliseconds. Defaults to 8000. */
+  timeoutMs?: number
+  /**
+   * How long to keep receiving transcript frames after the microphone stops,
+   * in milliseconds. Defaults to 1000. The provider settles its last
+   * transcripts after the audio ends, so closing at `audioStreamEnd` loses the
+   * speaker's final words.
+   */
+  flushWindowMs?: number
+  /**
+   * How long a warm provider socket may sit unused before it is dropped, in
+   * milliseconds. Defaults to 480000 (8 minutes). Dropping it releases the
+   * provider session instead of holding an idle one open indefinitely.
+   */
+  idleTimeoutMs?: number
+  /**
+   * Quiet period between the last transcript frame and the polish request, in
+   * milliseconds. Defaults to 220, matching the delay a fast speaker's trailing
+   * final needs to arrive.
+   */
+  settleMs?: number
+  /** Deadline for the provider socket's connect and setup handshake, in milliseconds. Defaults to 10000. */
+  connectTimeoutMs?: number
+  /** Deadline for one graceful provider socket close, in milliseconds. Defaults to 2000. */
+  closeTimeoutMs?: number
+  /** Cap on decoded audio one utterance may carry, in bytes. Defaults to 8388608 (8 MiB, about 4 minutes at 16 kHz mono). */
+  maxUtteranceBytes?: number
+}
+```
+
+来源： [`packages/client/ui-voice/src/index.ts:55`](../packages/client/ui-voice/src/index.ts)
+
 <a id="deepseek-aidsh-code-runtime-worker-thread"></a>
 
 ## `@deepseek-ai/dsh-code-runtime-worker-thread`
@@ -3465,6 +3554,7 @@ export interface Config {
 - `@deepseek-ai/dsh-client-ui-directory-picker-browse`（[`packages/client/ui-directory-picker-browse/src/index.ts`](../packages/client/ui-directory-picker-browse/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-directory-picker-native`（[`packages/client/ui-directory-picker-native/src/index.ts`](../packages/client/ui-directory-picker-native/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-goal`（[`packages/client/ui-goal/src/index.ts`](../packages/client/ui-goal/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-holds`（[`packages/client/ui-holds/src/index.ts`](../packages/client/ui-holds/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-input-trigger`（[`packages/client/ui-input-trigger/src/index.ts`](../packages/client/ui-input-trigger/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-jobs`（[`packages/client/ui-jobs/src/index.ts`](../packages/client/ui-jobs/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-layout`（[`packages/client/ui-layout/src/index.ts`](../packages/client/ui-layout/src/index.ts)）

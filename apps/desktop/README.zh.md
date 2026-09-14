@@ -43,6 +43,12 @@ Electron 根据应用 locale 选择类型化的英文或中文桌面壳文案，
 
 包事务独占持有 `$DSH_HOME/profiles/desktop/lock`，直到 pnpm 进程退出。重置保留目录及其锁，直到初始化和 Host 启动完成。共享链接在 macOS/Linux 使用目录软链接，在 Windows 使用 junction；清理只移除链接，不删除其目标。共享包使用文件系统的规范路径识别，因此 Windows 路径大小写变化不会单独触发 profile 激活。原生构建遵循 profile 中经过审查的 `allowBuilds` 列表；新安装的包如果需要构建但未在列表中获准，事务会失败。
 
+## 托盘与窗口生命周期
+
+壳会安装一个托盘图标，并依靠它保持进程存活。关闭主窗口只会隐藏窗口，不会结束运行；只要托盘仍在，`window-all-closed` 就不会退出应用。托盘菜单是回到应用的通道：**显示**会恢复并聚焦主窗口，**检查更新…** 与应用菜单执行同一次检查，**退出** 会停止 dsh 子进程并退出。只有显式退出、接受更新安装或致命启动失败才会结束进程；macOS 保留其自身的 window-all-closed 约定。
+
+托盘图标是编译进壳的 PNG data URL，而不是从磁盘读取的文件：打包的 `files` 列表只包含编译后的 JavaScript 与 renderer，磁盘上的图片会为每个平台引入额外的打包改动。
+
 ## 开发
 
 `dev:desktop` 会构建当前 Host、客户端 bundle、Web 前端和 Electron 壳，把已构建的 CLI 包、私有 Desktop Host 包及其 workspace 依赖投影为一次性桌面 npm 项目，然后直接启动 Electron；这条路径不下载安装包内的 Node.js，也不从 npm 解析 dsh：

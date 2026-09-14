@@ -150,6 +150,25 @@ export function detectOffsetOfClipboardOffset(layout: ComposerLayout, clipboardO
   return layout.detectLength
 }
 
+/**
+ * Whether one clipboard offset is a position an edit may address. Offsets
+ * inside a chip's clipboard expansion are not: {@link detectOffsetOfClipboardOffset}
+ * snaps them to the chip's trailing edge, so an edit built from such an offset
+ * would silently address a different range of the document than the caller
+ * measured.
+ * @param layout - the current walk product.
+ * @param clipboardOffset - offset into the clipboard projection.
+ * @returns true when the offset is a document boundary or falls inside text.
+ */
+export function isClipboardCutPoint(layout: ComposerLayout, clipboardOffset: number): boolean {
+  for (const segment of layout.segments) {
+    const end = segment.clipboardStart + segment.clipboardLength
+    if (clipboardOffset >= end) continue
+    return segment.kind !== 'chip'
+  }
+  return true
+}
+
 /** The published projection product consumed by the shell every update. */
 export interface EditorProjection {
   /** Trigger/TokenSpan coordinate text (chip = one U+FFFC). */

@@ -1,0 +1,59 @@
+{
+  "extends": "../../../tsconfig.base.client.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types",
+    "tsBuildInfoFile": "lib/tsconfig.client.tsbuildinfo"
+  },
+  "files": [
+    "src/css-modules.d.ts",
+    "src/live-protocol.ts",
+    "src/protocol.ts",
+    "src/voice-settings.ts",
+    "src/client/index.ts",
+    "src/client/capture.ts",
+    "src/client/dictation.ts",
+    "src/client/live.ts",
+    "src/client/locales.ts",
+    "src/client/meter.ts",
+    "src/client/pcm.ts",
+    "src/client/polish.ts",
+    "src/client/prefs.ts",
+    "src/client/ptt.ts",
+    "src/client/recognition.ts",
+    "src/client/silence.ts",
+    "src/client/transcript.ts",
+    "src/client/VoiceControl.tsx",
+    "src/client/VoiceWave.tsx",
+    "src/client/settings/VoiceSettingsRow.tsx"
+  ],
+  "references": [
+    {
+      "path": "../../../vendor/cordis"
+    },
+    {
+      "path": "../../../vendor/schemastery"
+    },
+    {
+      "path": "../locale"
+    },
+    {
+      "path": "../store"
+    },
+    {
+      "path": "../ui-conversation"
+    },
+    {
+      "path": "../ui-primitives"
+    },
+    {
+      "path": "../ui-renderer"
+    },
+    {
+      "path": "../ui-settings"
+    },
+    {
+      "path": "../ui-slots"
+    }
+  ]
+}

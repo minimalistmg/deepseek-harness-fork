@@ -342,11 +342,26 @@
     - id: ui-plan
       name: '@deepseek-ai/dsh-client-ui-plan'
 
+    # Parked drafts: the composer's Hold control and the per-Session dock that
+    # keeps unsent drafts above the composer card, under the send queue.
+    - id: ui-holds
+      name: '@deepseek-ai/dsh-client-ui-holds'
+
+    # Account balance: the platform reading under the composer card, beside the
+    # session statistics. Absent a credential the pill renders nothing.
+    - id: ui-balance
+      name: '@deepseek-ai/dsh-client-ui-balance'
+
     - id: ui-user-questions
       name: '@deepseek-ai/dsh-client-ui-user-questions'
 
     - id: ui-trajectory
       name: '@deepseek-ai/dsh-client-ui-trajectory'
+
+    # Voice input: the composer's dictation toggle over the browser's own
+    # speech recognition, seated before the model seat and submit action.
+    - id: ui-voice
+      name: '@deepseek-ai/dsh-client-ui-voice'
 
 # ── the agent plane moves behind agent presets ─────────────────────────────
 #

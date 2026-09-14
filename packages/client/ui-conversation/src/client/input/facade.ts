@@ -33,7 +33,9 @@ import { ReferenceChipNode, $createReferenceChipNode } from './editor/chip-node.
 import { refreshClaimDecoration, registerClaimDecoration } from './editor/claim-decor.ts'
 import { registerTextRefDecoration, rescanTextRefs, TextRefNode } from './editor/text-ref.ts'
 import type { EditorProjection } from './editor/projection.ts'
-import { $composerLayout, $projectComposer, detectOffsetOfClipboardOffset } from './editor/projection.ts'
+import {
+  $composerLayout, $projectComposer, detectOffsetOfClipboardOffset, isClipboardCutPoint,
+} from './editor/projection.ts'
 import { $replaceDetectSpanWithNodes, $replaceDetectSpanWithText } from './editor/span-map.ts'
 
 /** Popup face the shell needs (dismissal only; typed structurally to avoid a value import). */
@@ -136,6 +138,8 @@ export class SessionInputShell implements SessionInput {
   /** The public provide-channel action face (one stable identity per session). */
   readonly actions: InputActions = {
     setDraft: (text) => { this.setDraft(text) },
+    insertText: (text) => { this.paste(text) },
+    replaceRange: (start, end, text) => this.replaceRange(start, end, text),
     addAttachments: ids => this.addAttachments(ids),
     removeAttachment: (id) => { this.removeAttachment(id) },
     pruneAttachments: (ids) => { this.pruneAttachments(ids) },
@@ -355,6 +359,34 @@ export class SessionInputShell implements SessionInput {
       if (root.getChildrenSize() === 0) root.append($createParagraphNode())
       root.selectEnd().insertText(clean)
     }, PASTE_TAG)
+  }
+
+  /**
+   * Replace one range of the clipboard projection with plain text
+   * (placeholder-sanitized), addressing it by the same offsets the caller read
+   * from `InputState.draft`. Both boundaries must be positions an edit may
+   * address — inside the projection, and never inside a reference chip's
+   * clipboard expansion — so a caller that tracked a range over its own plain
+   * text can rewrite exactly that text and leave every chip where it was. The
+   * caret lands after the replacement; an empty range inserts at that offset.
+   * @param start - range start in clipboard-projection offsets.
+   * @param end - range end in clipboard-projection offsets.
+   * @param text - replacement text.
+   * @returns whether the range was addressable and the edit applied.
+   */
+  replaceRange(start: number, end: number, text: string): boolean {
+    const clean = text.replace(REFERENCE_PLACEHOLDER_RE, '')
+    let applied = false
+    this.applyEdit(() => {
+      const layout = $composerLayout()
+      if (start < 0 || end < start || end > layout.clipboardText.length) return
+      if (!isClipboardCutPoint(layout, start) || !isClipboardCutPoint(layout, end)) return
+      applied = $replaceDetectSpanWithText({
+        start: detectOffsetOfClipboardOffset(layout, start),
+        end: detectOffsetOfClipboardOffset(layout, end),
+      }, clean)
+    })
+    return applied
   }
 
   /**

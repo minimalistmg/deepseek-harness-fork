@@ -232,12 +232,40 @@ export interface SessionInputResolver {
 /**
  * The public input action face provided to every session-scope slot
  * component: stable-identity void callbacks, mirroring the
- * useStore+actions convention. Command-style handles (arbitrate/space/
- * paste/…) stay InputBar-private and never ride this face.
+ * useStore+actions convention. The keyboard face's command handles
+ * (arbitrate/space/…) stay InputBar-private; the editing verbs here are
+ * complete single edits that need no trigger, span, or arbitration state
+ * from the caller.
  */
 export interface InputActions {
   /** Replace the whole draft (persisted-draft seed and programmatic writes). */
   setDraft(text: string): void
+  /**
+   * Insert plain text over the current editor selection, preserving the
+   * reference chips already in the draft that {@link setDraft} would discard;
+   * detector placeholders inside `text` are stripped, so a caller cannot forge
+   * a chip position. A never-focused surface lands the text at the document
+   * end.
+   * @param text - plain text to insert.
+   */
+  insertText(text: string): void
+  /**
+   * Replace one range of the draft with plain text, addressed by the
+   * clipboard-projection offsets a caller reads from `InputState.draft`. This
+   * is the verb for rewriting text a caller previously put in the draft: it
+   * leaves the rest of the document, including reference chips, untouched,
+   * which {@link setDraft} cannot do because the full-draft write clears the
+   * root and then discards every chip it did not re-create. Both boundaries
+   * must fall inside the current draft and outside a reference chip's
+   * clipboard expansion; the edit is refused, not adjusted, when they do not,
+   * so a caller holding offsets the user's own editing invalidated learns that
+   * its range is gone instead of deleting text it never wrote.
+   * @param start - range start in clipboard-projection offsets.
+   * @param end - range end in clipboard-projection offsets.
+   * @param text - plain text to put in the range; detector placeholders are stripped.
+   * @returns whether the range was addressable and the edit applied.
+   */
+  replaceRange(start: number, end: number, text: string): boolean
   /** Append ordered browser-owned attachment ids; busy admission phases refuse. */
   addAttachments(ids: readonly DraftAttachmentId[]): boolean
   /** Remove one browser-owned attachment id; busy admission phases refuse. */

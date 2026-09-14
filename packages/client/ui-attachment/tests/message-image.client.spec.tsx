@@ -283,6 +283,8 @@ describe('ImageGallery', () => {
       useInput,
       inputActions: {
         setDraft: vi.fn(),
+        insertText: vi.fn(),
+        replaceRange: vi.fn(() => true),
         addAttachments: vi.fn(() => true),
         removeAttachment: vi.fn(),
         pruneAttachments: vi.fn(),

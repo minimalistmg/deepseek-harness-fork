@@ -35,7 +35,7 @@ pre-commit:
       run: git diff --cached --check
 
     - name: vendor manifest guard
-      run: scripts/check-vendor-manifest.sh
+      run: node_modules/.bin/tsx scripts/check-vendor-manifest.ts
 
 pre-merge-commit:
   jobs:

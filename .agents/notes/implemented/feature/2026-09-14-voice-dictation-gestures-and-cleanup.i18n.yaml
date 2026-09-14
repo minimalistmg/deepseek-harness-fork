@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-14-voice-dictation-gestures-and-cleanup.md
+2026-09-14-voice-dictation-gestures-and-cleanup.md: 9fd40476fac36553e84dde103cda8dc521c4bc9f
+2026-09-14-voice-dictation-gestures-and-cleanup.zh.md: c18e63586287eb5bb4123ca93aa65a01a00c6b3e

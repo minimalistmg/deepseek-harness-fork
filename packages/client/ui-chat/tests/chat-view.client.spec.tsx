@@ -384,6 +384,8 @@ function makeHarness(
     useInput: (() => { throw new Error('unused') }),
     inputActions: {
       setDraft: () => {},
+      insertText: () => {},
+      replaceRange: () => false,
       addAttachments: () => true,
       removeAttachment: () => {},
       pruneAttachments: () => {},

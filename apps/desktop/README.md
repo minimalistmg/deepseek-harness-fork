@@ -43,6 +43,12 @@ Reset deletes every entry in `$DSH_HOME/profiles/desktop` except the held transa
 
 Package transactions hold `$DSH_HOME/profiles/desktop/lock` exclusively through pnpm process exit. Reset preserves the directory and its lock until initialization and Host startup finish. Shared links use directory symlinks on macOS/Linux and junctions on Windows; cleanup removes links without deleting their targets. Canonical filesystem paths identify shared packages, so Windows path casing alone does not trigger profile activation. Native builds follow the profile’s reviewed `allowBuilds` list; installing a new build-requiring package without approval in that list fails the transaction.
 
+## Tray and window lifecycle
+
+The shell installs one tray icon and keeps the process alive behind it. Closing the main window hides it instead of ending the run, and `window-all-closed` leaves the application running while the tray stands. The tray's menu is the route back: **Show** restores and focuses the main window, **Check for Updates…** runs the same check as the application menu, and **Quit** stops the dsh child and exits. Only an explicit Quit, an accepted update install, or a fatal startup failure ends the process; macOS keeps its own window-all-closed convention.
+
+The tray icon is a PNG data URL compiled into the shell rather than a file read from disk, because the packaged `files` list carries compiled JavaScript and the renderer only: an image on disk would need a packaging change per platform.
+
 ## Develop
 
 `dev:desktop` builds the current Host, client bundles, Web frontend, and Electron shell, projects the built CLI and private Desktop Host packages with their workspace dependencies into a disposable desktop npm project, and launches Electron without downloading the packaged Node.js runtime or resolving dsh from npm:

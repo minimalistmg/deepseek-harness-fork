@@ -38,7 +38,9 @@
   // belongs to the host aggregate, which excludes this program's `*.client.*`
   // in turn. `exclude` wins over `include`, so the test glob above stays broad.
   "exclude": [
-    "packages/client/*/tests/**/*.host.spec.ts"
+    "packages/client/*/tests/**/*.host.spec.ts",
+    "packages/client/*/tests/**/*.host.ts",
+    "packages/client/*/tests/**/*.host.tsx"
   ],
   "references": [
     // Producer-to-UI spill tests execute the real nested dispatch worker.
@@ -94,14 +96,17 @@
     { "path": "./packages/client/ui-directory-picker-browse" },
     { "path": "./packages/client/ui-directory-picker-native" },
     { "path": "./packages/client/ui-goal" },
+    { "path": "./packages/client/ui-agent-preset" },
+    { "path": "./packages/client/ui-balance/tsconfig.client.json" },
+    { "path": "./packages/client/ui-holds" },
     { "path": "./packages/client/ui-message-feedback" },
     { "path": "./packages/client/ui-model-selection" },
-    { "path": "./packages/client/ui-agent-preset" },
     { "path": "./packages/client/ui-permission-presets" },
     { "path": "./packages/client/ui-plan" },
     { "path": "./packages/client/ui-settings-plugins" },
     { "path": "./packages/client/ui-user-questions" },
     { "path": "./packages/client/ui-trajectory" },
+    { "path": "./packages/client/ui-voice/tsconfig.client.json" },
     { "path": "./packages/session-query/session-log-export/tsconfig.client.json" },
     { "path": "./packages/client/ui-open-in-app" },
     { "path": "./packages/client/ui-theme" },

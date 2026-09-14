@@ -1,0 +1,121 @@
+/* Account balance pill: the same centered footer row the session stats use, so
+   the two readings sit on one baseline under the composer card. */
+
+.root {
+  display: flex;
+  justify-content: center;
+  max-width: var(--dsh-chat-content-width);
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 4px calc(var(--dsh-composer-side-clearance) + 16px) 0px;
+  font-size: var(--dsh-content-font-size-secondary, 13px);
+  line-height: calc(20px + var(--dsh-content-font-delta-secondary, 0px));
+}
+
+.anchor {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 1px 8px;
+  border: none;
+  border-radius: 24px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  line-height: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pill svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.pill:hover,
+.pill[aria-expanded='true'] {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.label,
+.status {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sep {
+  color: var(--dsw-alias-separator-primary);
+  margin: 0 6px;
+}
+
+.panel {
+  position: fixed;
+  z-index: 40;
+  min-width: 240px;
+  padding: 10px 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-module-platform);
+  color: var(--dsw-alias-label-primary);
+  font-size: var(--dsh-content-font-size-secondary, 13px);
+  line-height: calc(20px + var(--dsh-content-font-delta-secondary, 0px));
+}
+
+.panelHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panelTitle {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.panelTotal {
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-primary);
+}
+
+.details {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 12px;
+  margin: 8px 0 0;
+  padding: 8px 0 0;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.term {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.detail {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.usage {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--dsw-alias-label-secondary);
+  text-decoration: none;
+}
+
+.usage:hover {
+  color: var(--dsw-alias-label-primary);
+  text-decoration: underline;
+}
